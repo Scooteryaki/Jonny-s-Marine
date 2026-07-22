@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: linear-gradient(180deg, rgba(11, 34, 51, 0.18) 0%, rgba(11, 34, 51, 0.42) 100%), url('assets/sunset.jpg') center / cover no-repeat fixed #0B2233; background-attachment: fixed; font-family: 'Public Sans', sans-serif; color: #12283A; -webkit-font-smoothing: antialiased; }
+  a { color: #2E7F8F; text-decoration: none; }
+  a:hover { color: #E0723C; }
+  @keyframes brandMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .brand-track { animation: brandMarquee 38s linear infinite; }
+  .brand-track:hover { animation-play-state: paused; }
+</style>
+<script src="https://elfsightcdn.com/platform.js" async></script>
+</helmet>
+
+<!-- Preview switcher (editor only, hidden inside embedded mobile frame) -->
+<sc-if value="{{ showSwitcher }}" hint-placeholder-val="{{ false }}">
+  <div style="position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; gap: 4px; background: rgba(8, 26, 40, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid #1C425E; border-radius: 999px; padding: 4px; box-shadow: 0 6px 24px rgba(8, 26, 40, 0.4);">
+    <button onClick="{{ setDesktop }}" style="border: none; cursor: pointer; font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; padding: 8px 18px; border-radius: 999px; background: {{ desktopBtnBg }}; color: {{ desktopBtnColor }};">Desktop</button>
+    <button onClick="{{ setMobile }}" style="border: none; cursor: pointer; font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; padding: 8px 18px; border-radius: 999px; background: {{ mobileBtnBg }}; color: {{ mobileBtnColor }};">Mobile</button>
+  </div>
+</sc-if>
+
+<!-- Mobile preview overlay -->
+<sc-if value="{{ showMobileFrame }}" hint-placeholder-val="{{ false }}">
+  <div style="position: fixed; inset: 0; z-index: 190; background: rgba(6, 20, 31, 0.82); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 72px 20px 32px;">
+    <div style="width: 402px; max-width: 100%; height: 100%; max-height: 860px; background: #0B2233; border: 10px solid #060F17; border-radius: 40px; box-shadow: 0 24px 60px rgba(6, 20, 31, 0.6); overflow: hidden; position: relative;">
+      <iframe src="{{ selfUrl }}" title="Mobile preview" style="width: 100%; height: 100%; border: none; display: block; border-radius: 30px; background: #0B2233;"></iframe>
+    </div>
+  </div>
+</sc-if>
+
+<!-- Header -->
+<header style="position: sticky; top: 0; z-index: 50; background: rgba(11, 34, 51, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #F3EDE1;">
+  <div style="padding: 10px clamp(20px, 5vw, 56px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <img src="assets/logo.png" alt="Jonny's Marine" style="height: 58px; width: auto; display: block;">
+      </sc-if>
+      <span style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #7FB3BF;">Mobile Boat Service</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <a href="tel:407-607-4984" style="color: #F3EDE1; font-weight: 600; font-size: 15px; padding: 10px 0;" style-hover="color: #E0723C;">407-607-4984</a>
+      </sc-if>
+      <a onClick="{{ goQuote }}" style="background: #E0723C; color: #FDF8EF; font-weight: 700; font-size: 14px; padding: 12px 18px; border-radius: 6px; letter-spacing: 0.02em; min-height: 20px; display: inline-flex; align-items: center; cursor: pointer;" style-hover="background: #C95F2D; color: #FDF8EF;">Get a Free Quote</a>
+    </div>
+  </div>
+  <nav style="padding: 0 clamp(12px, 5vw, 56px); display: flex; gap: clamp(6px, 2vw, 22px); overflow-x: auto; border-top: 1px solid rgba(127, 179, 191, 0.22); scrollbar-width: none;">
+    <sc-for list="{{ tabsNav }}" as="t" hint-placeholder-count="5">
+      <button onClick="{{ t.onClick }}" style="background: none; border: none; cursor: pointer; font-family: 'Public Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.03em; padding: 12px 4px; white-space: nowrap; color: {{ t.color }}; border-bottom: 3px solid {{ t.borderColor }};">{{ t.label }}</button>
+    </sc-for>
+  </nav>
+</header>
+
+<sc-if value="{{ tabHome }}" hint-placeholder-val="{{ true }}">
+<!-- Hero -->
+<section style="background: linear-gradient(180deg, rgba(11, 34, 51, 0.22) 0%, rgba(11, 34, 51, 0.45) 100%); color: #F3EDE1; text-shadow: 0 1px 12px rgba(11, 34, 51, 0.45); padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; gap: clamp(32px, 5vw, 64px); align-items: center; flex-wrap: wrap;">
+    <div style="flex: 1 1 420px; min-width: 280px;">
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+        <img src="assets/logo.png" alt="Jonny's Marine" style="display: block; height: 210px; width: auto; max-width: 100%; margin: 0 auto 16px; filter: drop-shadow(0 4px 16px rgba(8, 26, 40, 0.5));">
+      </sc-if>
+      <div style="display: inline-flex; align-items: center; gap: 8px; border: 1px solid #2E7F8F; color: #7FB3BF; border-radius: 999px; padding: 6px 14px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">We come to you · Central Florida</div>
+      <h1 style="font-family: 'Source Serif 4', serif; font-weight: 600; font-size: clamp(30px, 4vw, 46px); line-height: 1.15; margin: 20px 0 16px; text-wrap: pretty; color: #FDF8EF;">We Come to You. You Get Back on the Water.</h1>
+      <p style="font-size: clamp(16px, 1.6vw, 19px); line-height: 1.6; color: #B9CBD3; margin: 0 0 28px; max-width: 52ch; text-wrap: pretty;">Truck-based mobile marine service — no hauling, no shop drop-offs. Expert outboard, electrical, and electronics work done right at your dock, driveway, or marina.</p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="#contact" style="background: #E0723C; color: #FDF8EF; font-weight: 700; font-size: 16px; padding: 14px 26px; border-radius: 8px;" style-hover="background: #C95F2D; color: #FDF8EF;">Get a Free Quote</a>
+        <a href="tel:407-607-4984" style="border: 1.5px solid #2E7F8F; color: #F3EDE1; font-weight: 600; font-size: 16px; padding: 14px 26px; border-radius: 8px;" style-hover="border-color: #E0723C; color: #E0723C;">Call or Text 407-607-4984</a>
+      </div>
+      <p style="margin: 22px 0 0; font-size: 13px; color: #7FB3BF;">Yamaha &amp; Suzuki outboards · Electrical · Electronics · Free quotes by phone, text, or email</p>
+    </div>
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="flex: 1 1 300px; min-width: 260px; display: flex; justify-content: center; align-items: center;">
+        <img src="assets/logo.png" alt="Jonny's Marine" style="display: block; height: clamp(280px, 36vw, 480px); width: auto; max-width: 100%; object-fit: contain; filter: drop-shadow(0 6px 24px rgba(8, 26, 40, 0.5));">
+      </div>
+    </sc-if>
+  </div>
+</section>
+
+<!-- Meet Jonny -->
+<section id="about" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; gap: clamp(32px, 5vw, 64px); align-items: center; flex-wrap: wrap;">
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="flex: 0 1 320px; min-width: 220px; max-width: 360px; aspect-ratio: 4 / 5; position: relative;">
+      <img src="assets/jonny.jpg" alt="Jonny" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px; display: block;">
+    </div>
+    </sc-if>
+    <div style="flex: 1 1 340px; min-width: 260px; background: rgba(253, 248, 239, 0.88); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border-radius: 14px; padding: clamp(24px, 3.5vw, 40px);">
+      <div style="display: flex; gap: 16px; align-items: flex-start;">
+        <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+          <img src="assets/jonny.jpg" alt="Jonny" style="flex: none; width: 96px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 12px; display: block;">
+        </sc-if>
+        <div>
+      <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #2E7F8F; margin: 0 0 10px;">Meet Jonny</p>
+      <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 14px; color: #0B2233; text-wrap: pretty;">The technician behind the truck</h2>
+        </div>
+      </div>
+      <p style="color: #4E6472; font-size: 16.5px; line-height: 1.7; margin: 0 0 24px; max-width: 58ch; text-wrap: pretty;">Jonny is a Florida-based mobile marine service technician and business owner with nearly ten years of hands-on experience specializing in Suzuki outboard motors. Backed by Suzuki dealer training and real-world expertise, he provides reliable maintenance, diagnostics, and repairs with a commitment to quality service.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <span style="background: #F3EDE1; border: 1px solid #E4DAC6; color: #0B2233; font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: 999px; text-align: center;">Suzuki dealer trained</span>
+        <span style="background: #F3EDE1; border: 1px solid #E4DAC6; color: #0B2233; font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: 999px; text-align: center;">10 years hands-on experience</span>
+        <span style="background: #F3EDE1; border: 1px solid #E4DAC6; color: #0B2233; font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: 999px; text-align: center;">Owner-operated</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Mobile strip -->
+<div style="background: rgba(46, 127, 143, 0.92); color: #FDF8EF; padding: 14px clamp(20px, 5vw, 56px); display: flex; justify-content: center; gap: clamp(20px, 4vw, 56px); flex-wrap: wrap; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">
+  <span>Your dock</span><span style="opacity: 0.5;">•</span><span>Your driveway</span><span style="opacity: 0.5;">•</span><span>Your marina</span><span style="opacity: 0.5;">•</span><span>We bring the shop to you</span>
+</div>
+
+<!-- Truck -->
+<section style="position: relative; padding: 0;">
+  <img src="assets/truck.jpg" alt="Jonny's Marine mobile service truck" style="display: block; width: 100%; height: clamp(340px, 55vw, 560px); object-fit: cover; object-position: center 80%;">
+  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 34, 51, 0) 40%, rgba(11, 34, 51, 0.72) 100%); display: flex; align-items: flex-end;">
+    <div style="max-width: 1120px; margin: 0 auto; width: 100%; padding: 0 clamp(20px, 5vw, 56px) clamp(28px, 4vw, 48px); display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap;">
+      <div>
+        <p style="margin: 0 0 6px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A;">The rolling shop</p>
+        <p style="margin: 0; font-family: 'Source Serif 4', serif; font-size: clamp(22px, 3vw, 32px); font-weight: 600; color: #FDF8EF; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6); text-wrap: pretty;">If you see this truck, a boat nearby is in good hands</p>
+      </div>
+      <a href="#contact" style="flex: none; background: #E0723C; color: #FDF8EF; font-weight: 700; font-size: 15px; padding: 13px 24px; border-radius: 8px;" style-hover="background: #C95F2D; color: #FDF8EF;">Get it to your dock</a>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials / Google reviews widget -->
+<section id="reviews" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px); background: rgba(11, 34, 51, 0.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); color: #F3EDE1;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #7FB3BF; margin: 0 0 10px;">Testimonials</p>
+    <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 28px; color: #FDF8EF;">What boat owners say</h2>
+
+    <!-- Elfsight Google Reviews -->
+    <div class="elfsight-app-f4d5030a-ee48-4035-bf07-f50a1e3205a2" data-elfsight-app-lazy></div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ tabServices }}" hint-placeholder-val="{{ true }}">
+<!-- Services -->
+<section id="services" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(11, 34, 51, 0.6);">Services</p>
+    <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 12px; color: #FDF8EF; text-shadow: 0 1px 14px rgba(11, 34, 51, 0.65);">Everything from the powerhead to the speakers</h2>
+    <p style="color: #F0E6D6; font-size: 16px; line-height: 1.6; margin: 0 0 36px; max-width: 60ch; text-wrap: pretty; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6);">One skilled technician handling the whole job — diagnostics, installs, and repairs done with care.</p>
+    <div style="background: #0B2233; border-radius: 14px; padding: clamp(26px, 4vw, 40px); display: flex; gap: clamp(20px, 4vw, 48px); align-items: center; flex-wrap: wrap; margin-bottom: 18px;">
+      <div style="flex: 1 1 380px; min-width: 280px;">
+        <span style="display: inline-block; background: #E0723C; color: #FDF8EF; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; margin-bottom: 14px;">The specialty</span>
+        <h3 style="margin: 0 0 10px; font-family: 'Source Serif 4', serif; font-size: clamp(22px, 3vw, 32px); font-weight: 600; color: #FDF8EF; text-wrap: pretty;">Yamaha &amp; Suzuki outboard diagnostics &amp; repair</h3>
+        <p style="margin: 0; font-size: 15px; line-height: 1.65; color: #B9CBD3; max-width: 60ch; text-wrap: pretty;">From a rough idle to a full fuel system overhaul — even on older engines most shops won't touch. Diagnosed and fixed right at your dock.</p>
+      </div>
+      <a onClick="{{ goQuote }}" style="flex: none; border: 1.5px solid #2E7F8F; color: #F3EDE1; font-weight: 600; font-size: 15px; padding: 13px 24px; border-radius: 8px; cursor: pointer;" style-hover="border-color: #E0723C; color: #E0723C;">Ask about your engine</a>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start;">
+      <sc-for list="{{ serviceGroups }}" as="grp" hint-placeholder-count="2">
+        <div style="background: #FDF8EF; border: 1px solid #E4DAC6; border-radius: 14px; overflow: hidden;">
+          <div style="background: #2E7F8F; padding: 16px 24px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; color: #FDF8EF;">{{ grp.label }}</h3>
+            <span style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: #CDE6EB;">{{ grp.tag }}</span>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ grp.items }}" as="svc" hint-placeholder-count="4">
+              <div style="display: flex; gap: 14px; padding: 16px 24px; border-top: 1px solid #EFE6D4; align-items: flex-start;" style-hover="background: #F7F0E2;">
+                <span style="flex: none; width: 18px; height: 3px; border-radius: 2px; background: #E0723C; margin-top: 9px;"></span>
+                <div>
+                  <h4 style="margin: 0 0 3px; font-size: 15.5px; font-weight: 700; color: #0B2233;">{{ svc.title }}</h4>
+                  <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #4E6472;">{{ svc.desc }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Authorized brands marquee -->
+    <div style="margin-top: clamp(40px, 6vw, 64px);">
+      <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A; margin: 0 0 8px; text-shadow: 0 1px 8px rgba(11, 34, 51, 0.6);">Authorized Dealer &amp; Installer</p>
+      <p style="color: #F0E6D6; font-size: 16px; line-height: 1.6; margin: 0 0 24px; max-width: 62ch; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6);">Jonny's Marine is proud to supply, sell, and professionally install products from the trusted brands below — so the parts on your boat are the real deal, backed by the manufacturers behind them.</p>
+      <div style="overflow: hidden; position: relative; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);">
+        <div class="brand-track" style="display: flex; width: max-content; gap: 44px; align-items: center;">
+          <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
+            <div style="flex: none; height: 72px; display: flex; align-items: center; justify-content: center;">
+              <img src="{{ b.src }}" alt="{{ b.name }}" style="max-height: 100%; width: auto; object-fit: contain; display: block;">
+            </div>
+          </sc-for>
+          <sc-for list="{{ brands }}" as="b" hint-placeholder-count="10">
+            <div style="flex: none; height: 72px; display: flex; align-items: center; justify-content: center;">
+              <img src="{{ b.src }}" alt="{{ b.name }}" aria-hidden="true" style="max-height: 100%; width: auto; object-fit: contain; display: block;">
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ tabArea }}" hint-placeholder-val="{{ true }}">
+<!-- Service area -->
+<section id="area" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(11, 34, 51, 0.6);">Service Area</p>
+    <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 12px; color: #FDF8EF; text-shadow: 0 1px 14px rgba(11, 34, 51, 0.65);">Serving boaters across Central Florida</h2>
+    <p style="color: #F0E6D6; font-size: 16px; line-height: 1.6; margin: 0 0 36px; max-width: 60ch; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6);">Seven counties, one truck, zero hauling. Don't see your city? Reach out — it's probably on the route.</p>
+    <div style="display: {{ areaGridDisplay }}; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+      <sc-for list="{{ counties }}" as="c" hint-placeholder-count="7">
+        <div style="border-left: 3px solid #2E7F8F; background: rgba(243, 237, 225, 0.92); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 0 10px 10px 0; padding: 16px 18px;">
+          <h3 style="margin: 0 0 6px; font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 600; color: #0B2233;">{{ c.name }} County</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4E6472;">{{ c.cities }}</p>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: {{ accordionDisplay }}; flex-direction: column; gap: 10px;">
+      <sc-for list="{{ countiesMobile }}" as="c" hint-placeholder-count="7">
+        <div style="background: rgba(243, 237, 225, 0.94); border-left: 3px solid #2E7F8F; border-radius: 0 10px 10px 0; overflow: hidden;">
+          <button onClick="{{ c.toggle }}" style="display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; padding: 16px 18px; min-height: 52px; cursor: pointer; font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 600; color: #0B2233; text-align: left;">
+            <span>{{ c.name }} County</span>
+            <span style="font-size: 22px; color: #E0723C; font-weight: 400; line-height: 1;">{{ c.arrow }}</span>
+          </button>
+          <p style="margin: 0; padding: 0 18px 16px; font-size: 15px; line-height: 1.7; color: #4E6472; display: {{ c.citiesDisplay }};">{{ c.cities }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ tabWhy }}" hint-placeholder-val="{{ true }}">
+<!-- Why choose us -->
+<section id="why" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; gap: clamp(32px, 5vw, 64px); flex-wrap: wrap; align-items: flex-start;">
+    <div style="flex: 1 1 340px; min-width: 280px;">
+      <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(11, 34, 51, 0.6);">Why Jonny's Marine</p>
+      <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 14px; color: #FDF8EF; text-wrap: pretty; text-shadow: 0 1px 14px rgba(11, 34, 51, 0.65);">The shop comes to you — and so does the pride in the work</h2>
+      <p style="color: #F0E6D6; font-size: 16px; line-height: 1.65; margin: 0; max-width: 55ch; text-wrap: pretty; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6);">No trailer, no ramp lines, no leaving your boat in a lot for weeks. Jonny works on your boat where it lives, walks you through what he finds, and stands behind every repair.</p>
+    </div>
+    <div style="flex: 1 1 380px; min-width: 280px; display: flex; flex-direction: column; gap: 14px;">
+      <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="4">
+        <div style="display: flex; gap: 16px; background: rgba(253, 248, 239, 0.92); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid rgba(228, 218, 198, 0.6); border-radius: 10px; padding: 18px 20px; align-items: flex-start;">
+          <span style="flex: none; width: 10px; height: 10px; border-radius: 50%; background: #E0723C; margin-top: 6px;"></span>
+          <div>
+            <h3 style="margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #0B2233;">{{ r.title }}</h3>
+            <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #4E6472;">{{ r.desc }}</p>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+</sc-if>
+
+<sc-if value="{{ tabGallery }}" hint-placeholder-val="{{ true }}">
+<!-- Gallery -->
+<section id="gallery" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #7FB3BF; margin: 0 0 10px;">Gallery</p>
+    <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 12px; color: #FDF8EF;">From the Instagram feed</h2>
+    <p style="color: #C9D8DF; font-size: 16.5px; line-height: 1.7; max-width: 640px; margin: 0 0 28px;">Follow along with recent jobs, repairs, and rigs on the water.</p>
+    <!-- Elfsight Instagram Feed -->
+    <div class="elfsight-app-cd836256-163e-464c-a3ad-84df55b2ef97" data-elfsight-app-lazy></div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ tabContact }}" hint-placeholder-val="{{ true }}">
+<!-- Contact -->
+<section id="contact" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; gap: clamp(32px, 5vw, 64px); flex-wrap: wrap;">
+    <div style="flex: 1 1 380px; min-width: 280px;">
+      <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #FFD08A; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(11, 34, 51, 0.6);">Free Quotes</p>
+      <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 14px; color: #FDF8EF; text-shadow: 0 1px 14px rgba(11, 34, 51, 0.65);">Call, text, or email — quotes are always free</h2>
+      <p style="color: #F0E6D6; font-size: 16px; line-height: 1.65; margin: 0 0 28px; max-width: 55ch; text-wrap: pretty; text-shadow: 0 1px 10px rgba(11, 34, 51, 0.6);">Every job is different, so pricing starts with a conversation. Tell Jonny what's going on with your boat and get a straight answer, fast.</p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <a href="tel:407-607-4984" style="display: flex; align-items: baseline; gap: 12px; background: #0B2233; color: #FDF8EF; border-radius: 10px; padding: 18px 22px;" style-hover="background: #10304A; color: #FDF8EF;">
+          <span style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7FB3BF; font-weight: 700;">Call / Text</span>
+          <span style="font-family: 'Source Serif 4', serif; font-size: clamp(20px, 2.5vw, 26px); font-weight: 600;">407-607-4984</span>
+        </a>
+        <a href="mailto:JonnysMarine@gmail.com" style="display: flex; align-items: baseline; gap: 12px; background: rgba(243, 237, 225, 0.92); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid rgba(228, 218, 198, 0.6); color: #0B2233; border-radius: 10px; padding: 18px 22px; flex-wrap: wrap;" style-hover="border-color: #2E7F8F; color: #0B2233;">
+          <span style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #2E7F8F; font-weight: 700;">Email</span>
+          <span style="font-family: 'Source Serif 4', serif; font-size: clamp(17px, 2vw, 22px); font-weight: 600;">JonnysMarine@gmail.com</span>
+        </a>
+      </div>
+    </div>
+    <sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+      <form onSubmit="{{ submitForm }}" style="flex: 1 1 380px; min-width: 280px; background: rgba(243, 237, 225, 0.92); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(228, 218, 198, 0.6); border-radius: 14px; padding: clamp(22px, 3vw, 32px); display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="margin: 0; font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; color: #0B2233;">Or send a quick note</h3>
+        <input value="{{ formName }}" onChange="{{ setName }}" placeholder="Your name" style="font-family: 'Public Sans', sans-serif; font-size: 15px; padding: 13px 14px; border: 1px solid #D8CCB4; border-radius: 8px; background: #FDF8EF; color: #12283A; outline: none;" style-focus="border-color: #2E7F8F;">
+        <input value="{{ formPhone }}" onChange="{{ setPhone }}" placeholder="Phone or email" style="font-family: 'Public Sans', sans-serif; font-size: 15px; padding: 13px 14px; border: 1px solid #D8CCB4; border-radius: 8px; background: #FDF8EF; color: #12283A; outline: none;" style-focus="border-color: #2E7F8F;">
+        <textarea value="{{ formMsg }}" onChange="{{ setMsg }}" rows="4" placeholder="What's going on with the boat? (Make, engine, and city help too.)" style="font-family: 'Public Sans', sans-serif; font-size: 15px; padding: 13px 14px; border: 1px solid #D8CCB4; border-radius: 8px; background: #FDF8EF; color: #12283A; outline: none; resize: vertical;" style-focus="border-color: #2E7F8F;"></textarea>
+        <button type="submit" style="background: #E0723C; color: #FDF8EF; font-family: 'Public Sans', sans-serif; font-weight: 700; font-size: 15px; padding: 14px; border: none; border-radius: 8px; cursor: pointer;" style-hover="background: #C95F2D;">Send — opens your email app</button>
+        <p style="margin: 0; font-size: 12.5px; color: #7B8A93; text-align: center;">Fastest response: call or text 407-607-4984</p>
+      </form>
+    </sc-if>
+  </div>
+</section>
+
+</sc-if>
+
+<!-- Footer -->
+<footer style="background: rgba(8, 26, 40, 0.9); color: #7FB3BF; padding: 36px clamp(20px, 5vw, 56px);">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <img src="assets/logo.png" alt="Jonny's Marine logo" style="height: 64px; width: auto; display: block;">
+      <div>
+      <p style="margin: 0 0 4px; font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 600; color: #F3EDE1;">Jonny's Marine</p>
+      <p style="margin: 0; font-size: 13px;">Mobile boat service · Central Florida · <a href="tel:407-607-4984" style="color: #7FB3BF;" style-hover="color: #E0723C;">407-607-4984</a></p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; font-size: 14px; font-weight: 600;">
+      <a href="https://www.instagram.com/jonnys_marine/" target="_blank" style="color: #F3EDE1; padding: 12px 8px; display: inline-flex; align-items: center;" style-hover="color: #E0723C;">Instagram</a>
+      <a href="https://www.facebook.com/search/top?q=jonny%27s%20marine" target="_blank" style="color: #F3EDE1; padding: 12px 8px; display: inline-flex; align-items: center;" style-hover="color: #E0723C;">Facebook</a>
+      <a href="https://www.tiktok.com/@jonnys_marine" target="_blank" style="color: #F3EDE1; padding: 12px 8px; display: inline-flex; align-items: center;" style-hover="color: #E0723C;">TikTok</a>
+    </div>
+    <p style="margin: 0; font-size: 12.5px;">© 2026 Jonny's Marine · Follow along for projects &amp; tips</p>
+  </div>
+</footer>
+
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <div style="height: 76px;"></div>
+  <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 60; background: rgba(11, 34, 51, 0.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid #1C425E; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 10px;">
+    <a href="tel:407-607-4984" style="flex: 1.4; display: flex; align-items: center; justify-content: center; gap: 8px; background: #E0723C; color: #FDF8EF; font-weight: 700; font-size: 16px; min-height: 48px; border-radius: 10px;" style-active="background: #C95F2D;">Call / Text Jonny</a>
+    <a onClick="{{ goQuote }}" style="flex: 1; display: flex; align-items: center; justify-content: center; border: 1.5px solid #2E7F8F; color: #F3EDE1; font-weight: 600; font-size: 15px; min-height: 48px; border-radius: 10px; box-sizing: border-box; cursor: pointer;" style-active="border-color: #E0723C;">Free Quote</a>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;showForm&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Contact&quot; },
+  &quot;googleUrl&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://share.google/0EOqQFpB65ZjeUJAu&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Google Reviews&quot; },
+  &quot;ratingValue&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;5.0&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Google Reviews&quot; },
+  &quot;reviewCount&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;3&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Google Reviews&quot; }
+}">
+class Component extends DCLogic {
+  state = { name: '', phone: '', msg: '', mobile: typeof window !== 'undefined' && window.matchMedia('(max-width: 700px)').matches, openCounty: null, tab: 'home', preview: 'desktop', embedded: typeof window !== 'undefined' && window.location.hash === '#embed' };
+  componentDidMount() {
+    this._mq = window.matchMedia('(max-width: 700px)');
+    this._onMq = (e) => this.setState({ mobile: e.matches });
+    this._mq.addEventListener('change', this._onMq);
+  }
+  componentWillUnmount() {
+    if (this._mq) this._mq.removeEventListener('change', this._onMq);
+  }
+  _scrollRef = React.createRef();
+  renderVals() {
+    const reviewsData = [
+      { name: 'Robert Flint', initial: 'R', color: '#1E88A8', date: '2 months ago', text: 'Working on my boat for 7 years since it was new — over 1,100 hours and it still runs like new. He replaced all my electronics and installed radar and a trolling motor. Always easy to reach, honest, and professional.', moreLabel: 'Read more' },
+      { name: 'Lynn S', initial: 'L', color: '#C0562A', date: '4 months ago', text: "Excellent boat maintenance service. Jonny was thorough, professional, and clearly knows what he's doing. Everything was inspected, serviced, and explained in a way that made sense. Reliable, honest, and worth every penny. Will definitely keep choosing Jonny's Marine!", moreLabel: 'Read more' },
+      { name: 'Doreen Osbourne', initial: 'D', color: '#2E7D5B', date: '5 months ago', text: "This guy really cares about his work. He even helps teach you about your own boat. Organized, clean, and smart — the best I've seen in the boat business. And he's mobile! Very much a thumbs up.", moreLabel: 'Read more' },
+    ];
+    const countiesData = [
+      { name: 'Orange', cities: 'Orlando, Winter Park, Apopka, Ocoee, Winter Garden' },
+      { name: 'Seminole', cities: 'Oviedo, Sanford, Lake Mary, Altamonte Springs, Longwood, Casselberry' },
+      { name: 'Osceola', cities: 'Kissimmee, St. Cloud' },
+      { name: 'Lake', cities: 'Clermont, Leesburg, Mount Dora, Eustis, Tavares' },
+      { name: 'Volusia', cities: 'DeLand, Deltona, Orange City, DeBary, Daytona Beach, Ormond Beach' },
+      { name: 'Brevard', cities: 'Titusville, Cocoa, Cocoa Beach, Merritt Island, Cape Canaveral' },
+      { name: 'Polk', cities: 'Davenport, Haines City, Lakeland, Winter Haven' },
+    ];
+    const embedded = this.state.embedded;
+    const devMode = typeof window !== 'undefined' && (window.location.search.includes('dev') || window.location.hash.includes('dev') || window.self !== window.top);
+    const selfUrl = typeof window !== 'undefined' ? window.location.href.split('#')[0] + '#embed' : '';
+    const activeBg = '#E0723C', activeColor = '#FDF8EF', idleColor = '#7FB3BF';
+    const tab = this.state.tab || 'home';
+    const navItems = [
+      { key: 'home', label: 'Home' },
+      { key: 'services', label: 'Services' },
+      { key: 'area', label: 'Service Area' },
+      { key: 'why', label: "Why Jonny's" },
+      { key: 'gallery', label: 'Gallery' },
+      { key: 'freequote', label: 'Free Quote' },
+    ].filter((it) => !(this.state.mobile && it.key === 'freequote'));
+    const setTab = (k) => { this.setState({ tab: k }); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); };
+    return {
+      tabHome: tab === 'home',
+      tabServices: tab === 'services',
+      tabArea: tab === 'area',
+      tabWhy: tab === 'why',
+      tabGallery: tab === 'gallery',
+      tabContact: tab === 'home' || tab === 'freequote',
+      goQuote: () => setTab('freequote'),
+      tabsNav: navItems.map((it) => ({
+        ...it,
+        onClick: () => setTab(it.key),
+        color: tab === it.key ? '#FDF8EF' : '#B9CBD3',
+        borderColor: tab === it.key ? '#E0723C' : 'transparent',
+      })),
+      showSwitcher: false,
+      showMobileFrame: false,
+      selfUrl,
+      setDesktop: () => this.setState({ preview: 'desktop' }),
+      setMobile: () => this.setState({ preview: 'mobile' }),
+      desktopBtnBg: this.state.preview === 'desktop' ? activeBg : 'transparent',
+      desktopBtnColor: this.state.preview === 'desktop' ? activeColor : idleColor,
+      mobileBtnBg: this.state.preview === 'mobile' ? activeBg : 'transparent',
+      mobileBtnColor: this.state.preview === 'mobile' ? activeColor : idleColor,
+      isMobile: this.state.mobile,
+      isDesktop: !this.state.mobile,
+      areaGridDisplay: this.state.mobile ? 'none' : 'grid',
+      accordionDisplay: this.state.mobile ? 'flex' : 'none',
+      reviewGridDisplay: this.state.mobile ? 'none' : 'grid',
+      carouselDisplay: this.state.mobile ? 'flex' : 'none',
+      swipeHintDisplay: this.state.mobile ? 'block' : 'none',
+      countiesMobile: countiesData.map((c, i) => ({
+        ...c,
+        isOpen: this.state.openCounty === i,
+        citiesDisplay: this.state.openCounty === i ? 'block' : 'none',
+        arrow: this.state.openCounty === i ? '−' : '+',
+        toggle: () => this.setState(s => ({ openCounty: s.openCounty === i ? null : i })),
+      })),
+      showForm: this.props.showForm ?? true,
+      showHeroPhoto: this.props.showHeroPhoto ?? true,
+      brands: [
+        { name: 'Garmin', src: 'assets/brands/garmin.png' },
+        { name: 'Simrad', src: 'assets/brands/simrad.avif' },
+        { name: 'Fusion', src: 'assets/brands/fusion.png' },
+        { name: 'JL Audio', src: 'assets/brands/jl-audio.svg' },
+        { name: 'Minn Kota', src: 'assets/brands/minn-kota.png' },
+        { name: 'Lumitec', src: 'assets/brands/lumitec.png' },
+        { name: 'Gemlux', src: 'assets/brands/gemlux.png' },
+        { name: 'Interstate Batteries', src: 'assets/brands/interstate.png' },
+        { name: 'Abyss Battery', src: 'assets/brands/abyss.webp' },
+        { name: 'NOCO', src: 'assets/brands/noco.webp' },
+      ],
+      serviceGroups: [
+        { label: 'Fix it', tag: 'Repairs & diagnostics', items: [
+          { title: 'Electrical Diagnostic & Repair', desc: 'Tracking down shorts, drains, and gremlins other shops give up on.' },
+          { title: 'Complete Re-Wires', desc: 'Full harness replacements for older boats — tidy, labeled, marine-grade.' },
+          { title: 'Steering System Repair', desc: 'Hydraulic and cable steering serviced, sealed, and smooth again.' },
+          { title: 'Plumbing & Pump Repair', desc: 'Bilge, livewell, and fresh/raw water washdown pumps and plumbing — repaired or replaced.' },
+        ]},
+        { label: 'Upgrade it', tag: 'Installations', items: [
+          { title: 'Trolling Motor Installations', desc: 'Clean, properly wired installs that hold up season after season.' },
+          { title: 'Hydraulic Anchor Installations', desc: 'Shallow-water anchors mounted and plumbed right the first time.' },
+          { title: 'Electronic Installations', desc: 'GPS, fishfinders, radar — networked, flush-mounted, and dialed in.' },
+          { title: 'Sound System Installations', desc: 'Marine audio that sounds great and survives the water.' },
+        ]},
+      ],
+      counties: countiesData,
+      testimonials: [
+        { quote: "Working on my boat for 7 years since it was new — over 1,100 hours and it still runs like new. He replaced all my electronics and installed radar and a trolling motor. Always easy to reach, honest, and professional.", name: 'Robert Flint' },
+        { quote: "Excellent boat maintenance service. Jonny was thorough, professional, and clearly knows what he's doing. Everything was inspected, serviced, and explained in a way that made sense. The work was done on time, with great attention to detail, and my boat runs perfectly. Reliable, honest, and worth every penny. Highly recommend for routine maintenance and upkeep. Will definitely keep choosing Jonny's Marine for as long as I have my boat!", name: 'Lynn S' },
+        { quote: "This guy really cares about his work. He even helps teach you about your own boat. Organized, clean, and smart — the best I've seen in the boat business. And he's mobile! Very much a thumbs up.", name: 'Doreen Osbourne' },
+      ],
+      googleUrl: this.props.googleUrl ?? 'https://share.google/0EOqQFpB65ZjeUJAu',
+      ratingValue: this.props.ratingValue ?? '5.0',
+      reviewCount: this.props.reviewCount ?? reviewsData.length,
+      reviews: reviewsData,
+      cardWidth: this.state.mobile ? '82%' : '300px',
+      arrowDisplay: this.state.mobile ? 'none' : 'flex',
+      scrollRef: this._scrollRef,
+      scrollPrev: () => { const el = this._scrollRef.current; if (el) el.scrollBy({ left: -320, behavior: 'smooth' }); },
+      scrollNext: () => { const el = this._scrollRef.current; if (el) el.scrollBy({ left: 320, behavior: 'smooth' }); },
+      reasons: [
+        { title: 'Truly mobile', desc: 'Truck-based service at your dock, driveway, or marina. Your boat never leaves home.' },
+        { title: 'One technician, full accountability', desc: 'The person who quotes the job is the person who does it — and answers the phone after.' },
+        { title: 'Honest, free quotes', desc: 'No shop minimums or surprise line items. Call, text, or email and get a straight answer.' },
+        { title: 'Learn your own boat', desc: 'Jonny walks you through what he found and how to keep it running right.' },
+      ],
+      formName: this.state.name,
+      formPhone: this.state.phone,
+      formMsg: this.state.msg,
+      setName: (e) => this.setState({ name: e.target.value }),
+      setPhone: (e) => this.setState({ phone: e.target.value }),
+      setMsg: (e) => this.setState({ msg: e.target.value }),
+      submitForm: (e) => {
+        e.preventDefault();
+        const { name, phone, msg } = this.state;
+        const subject = encodeURIComponent('Quote request' + (name ? ' — ' + name : ''));
+        const body = encodeURIComponent(`Name: ${name}\nContact: ${phone}\n\n${msg}`);
+        window.location.href = `mailto:JonnysMarine@gmail.com?subject=${subject}&body=${body}`;
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>
