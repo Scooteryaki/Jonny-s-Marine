@@ -14,13 +14,13 @@
 <style>
   html { scroll-behavior: smooth; }
   body { margin: 0; background: linear-gradient(180deg, rgba(11, 34, 51, 0.18) 0%, rgba(11, 34, 51, 0.42) 100%), url('assets/sunset.jpg') center / cover no-repeat fixed #0B2233; background-attachment: fixed; font-family: 'Public Sans', sans-serif; color: #12283A; -webkit-font-smoothing: antialiased; }
+  @media (max-width: 700px) { body { background-attachment: scroll; } }
   a { color: #2E7F8F; text-decoration: none; }
   a:hover { color: #E0723C; }
   @keyframes brandMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
   .brand-track { animation: brandMarquee 38s linear infinite; }
   .brand-track:hover { animation-play-state: paused; }
 </style>
-<script src="https://elfsightcdn.com/platform.js" async></script>
 </helmet>
 
 <!-- Preview switcher (editor only, hidden inside embedded mobile frame) -->
@@ -69,7 +69,7 @@
   <div style="max-width: 1120px; margin: 0 auto; display: flex; gap: clamp(32px, 5vw, 64px); align-items: center; flex-wrap: wrap;">
     <div style="flex: 1 1 420px; min-width: 280px;">
       <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
-        <img src="assets/logo.png" alt="Jonny's Marine" style="display: block; height: 210px; width: auto; max-width: 100%; margin: 0 auto 16px; filter: drop-shadow(0 4px 16px rgba(8, 26, 40, 0.5));">
+        <img src="assets/logo.png" alt="Jonny's Marine" style="display: block; height: 280px; width: auto; max-width: 100%; margin: 0 auto 16px; filter: drop-shadow(0 4px 16px rgba(8, 26, 40, 0.5));">
       </sc-if>
       <div style="display: inline-flex; align-items: center; gap: 8px; border: 1px solid #2E7F8F; color: #7FB3BF; border-radius: 999px; padding: 6px 14px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;">We come to you · Central Florida</div>
       <h1 style="font-family: 'Source Serif 4', serif; font-weight: 600; font-size: clamp(30px, 4vw, 46px); line-height: 1.15; margin: 20px 0 16px; text-wrap: pretty; color: #FDF8EF;">We Come to You. You Get Back on the Water.</h1>
@@ -355,6 +355,14 @@ class Component extends DCLogic {
   componentWillUnmount() {
     if (this._mq) this._mq.removeEventListener('change', this._onMq);
   }
+  _ensureElfsight() {
+    if (this._elfsightLoaded || typeof document === 'undefined') return;
+    this._elfsightLoaded = true;
+    const s = document.createElement('script');
+    s.src = 'https://elfsightcdn.com/platform.js';
+    s.async = true;
+    document.head.appendChild(s);
+  }
   _scrollRef = React.createRef();
   renderVals() {
     const reviewsData = [
@@ -384,7 +392,7 @@ class Component extends DCLogic {
       { key: 'gallery', label: 'Gallery' },
       { key: 'freequote', label: 'Free Quote' },
     ].filter((it) => !(this.state.mobile && it.key === 'freequote'));
-    const setTab = (k) => { this.setState({ tab: k }); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); };
+    const setTab = (k) => { this.setState({ tab: k }); if (k === 'gallery') this._ensureElfsight(); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); };
     return {
       tabHome: tab === 'home',
       tabServices: tab === 'services',
