@@ -21,6 +21,7 @@
   .brand-track { animation: brandMarquee 38s linear infinite; }
   .brand-track:hover { animation-play-state: paused; }
 </style>
+<script src="https://elfsightcdn.com/platform.js" async></script>
 </helmet>
 
 <!-- Preview switcher (editor only, hidden inside embedded mobile frame) -->
@@ -136,7 +137,7 @@
 </section>
 
 <!-- Testimonials / Google reviews widget -->
-<section id="reviews" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px); background: rgba(11, 34, 51, 0.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); color: #F3EDE1;">
+<section id="reviews" style="padding: clamp(56px, 8vw, 96px) clamp(20px, 5vw, 56px); background: rgba(11, 34, 51, 0.62); color: #F3EDE1;">
   <div style="max-width: 1120px; margin: 0 auto;">
     <p style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #7FB3BF; margin: 0 0 10px;">Testimonials</p>
     <h2 style="font-family: 'Source Serif 4', serif; font-size: clamp(28px, 3.5vw, 40px); font-weight: 600; margin: 0 0 28px; color: #FDF8EF;">What boat owners say</h2>
@@ -351,19 +352,9 @@ class Component extends DCLogic {
     this._mq = window.matchMedia('(max-width: 700px)');
     this._onMq = (e) => this.setState({ mobile: e.matches });
     this._mq.addEventListener('change', this._onMq);
-    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
-    idle(() => this._ensureElfsight());
   }
   componentWillUnmount() {
     if (this._mq) this._mq.removeEventListener('change', this._onMq);
-  }
-  _ensureElfsight() {
-    if (this._elfsightLoaded || typeof document === 'undefined') return;
-    this._elfsightLoaded = true;
-    const s = document.createElement('script');
-    s.src = 'https://elfsightcdn.com/platform.js';
-    s.async = true;
-    document.head.appendChild(s);
   }
   _scrollRef = React.createRef();
   renderVals() {
@@ -409,8 +400,8 @@ class Component extends DCLogic {
         color: tab === it.key ? '#FDF8EF' : '#B9CBD3',
         borderColor: tab === it.key ? '#E0723C' : 'transparent',
       })),
-      showSwitcher: !embedded,
-      showMobileFrame: !embedded && this.state.preview === 'mobile',
+      showSwitcher: false,
+      showMobileFrame: false,
       selfUrl,
       setDesktop: () => this.setState({ preview: 'desktop' }),
       setMobile: () => this.setState({ preview: 'mobile' }),
