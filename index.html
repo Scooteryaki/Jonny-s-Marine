@@ -351,6 +351,8 @@ class Component extends DCLogic {
     this._mq = window.matchMedia('(max-width: 700px)');
     this._onMq = (e) => this.setState({ mobile: e.matches });
     this._mq.addEventListener('change', this._onMq);
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1200));
+    idle(() => this._ensureElfsight());
   }
   componentWillUnmount() {
     if (this._mq) this._mq.removeEventListener('change', this._onMq);
@@ -392,7 +394,7 @@ class Component extends DCLogic {
       { key: 'gallery', label: 'Gallery' },
       { key: 'freequote', label: 'Free Quote' },
     ].filter((it) => !(this.state.mobile && it.key === 'freequote'));
-    const setTab = (k) => { this.setState({ tab: k }); if (k === 'gallery') this._ensureElfsight(); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); };
+    const setTab = (k) => { this.setState({ tab: k }); if (typeof window !== 'undefined') window.scrollTo({ top: 0 }); };
     return {
       tabHome: tab === 'home',
       tabServices: tab === 'services',
